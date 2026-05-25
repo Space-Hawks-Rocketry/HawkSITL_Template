@@ -6,3 +6,6 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Add the found files to your executable or library
 add_executable(FlightComputer ${SOURCES})
+
+# Add necessary libraries
+target_link_libraries(FlightComputer PRIVATE zmq)

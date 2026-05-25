@@ -5,6 +5,9 @@ build:
 	cmake --build flight-computer/build
 
 run:
+	-pkill -f FlightComputer || true
+	-pkill -f "python3 environment/main.py" || true
+
 	./flight-computer/build/FlightComputer & \
 	python3 environment/main.py
 
