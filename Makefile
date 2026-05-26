@@ -16,4 +16,6 @@ sitl:
 	$(MAKE) run
 
 clean:
+	-pkill -f FlightComputer || true
+	-pkill -f "python3 environment/main.py" || true
 	rm -rf flight-computer/build

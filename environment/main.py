@@ -1,7 +1,8 @@
-from time import time
+from time import time, sleep
 import numpy as np
+import json
 
-from signal import Signaler
+from framework.IPC.IPC_computer import IPC_Computer
 
 class Square:
   
@@ -21,7 +22,7 @@ class Square:
       [np.cos(self.radians), np.sin(self.radians)],
       [-np.sin(self.radians), np.cos(self.radians)]
     ])
-    
+  
   def applyForce(self, force):
     self.force += force
     
@@ -40,7 +41,9 @@ class Square:
     
     
 
-signaler = Signaler()
+ipc = IPC_Computer()
+sleep(2)
+ipc.start(3563)
 
 
 square = Square(pos=np.array([0, 0], dtype=float))
@@ -49,16 +52,27 @@ target_pos = np.array([90.0, 45.0])
 dt = 0
 t = 0
 running = True
-res_force = signaler.updateComputer(0, 0, 0, 0)
+
+ipc.sendJSON({
+  "posx": 0.0,
+  "posy": 0.0,
+  "velx": 0.0,
+  "vely": 0.0
+})
+res_json = ipc.recvJSON()
+res_force = np.array([res_json["Fx"], res_json["Fy"]])
+
 while running:
   start_time = time()
   
-  res_force = signaler.updateComputer(
-      target_pos[0] - square.pos[0],
-      target_pos[1] - square.pos[1],
-      square.vel[0],
-      square.vel[1]
-  )
+  ipc.sendJSON({
+    "posx": target_pos[0] - square.pos[0],
+    "posy": target_pos[1] - square.pos[1],
+    "velx": square.vel[0],
+    "vely": square.vel[1]
+  })
+  res_json = ipc.recvJSON()
+  res_force = np.array([res_json["Fx"], res_json["Fy"]])
   print(f"(PHYSICS): Received control maneuver @ t={round(t,3)}s")
   
   square.applyForce(np.array([
