@@ -39,7 +39,7 @@ from framework.IPC.IPC_computer import IPC_Computer
     
 #     self.force = np.zeros(2, dtype=float)
 #     self.torque = 0.0
-    
+import csv
 
 class Drone:
   
@@ -61,11 +61,13 @@ class Drone:
     ])
     
   def setFanThrust(self, fan1: float, fan2: float):
-    self.fan1_thrust = max(0, fan1)
-    self.fan2_thrust = max(0, fan2)
+    self.fan1_thrust = max(0.0, fan1)
+    self.fan2_thrust = max(0.0, fan2)
     
   def update(self, dt):
-    force = self.getDCMtoBody().T @ np.array([0, 2 * min(self.fan1_thrust, self.fan2_thrust)]) + np.array([0, -9.8*self.m])
+    # force = self.getDCMtoBody().T @ np.array([0, 2 * min(self.fan1_thrust, self.fan2_thrust)]) + np.array([0, -9.8*self.m])
+    # torque = 0.5 * self.width * (self.fan2_thrust - self.fan1_thrust)
+    force = self.getDCMtoBody().T @ np.array([0, self.fan1_thrust + self.fan2_thrust]) + np.array([0, -9.8 * self.m])
     torque = 0.5 * self.width * (self.fan2_thrust - self.fan1_thrust)
     
     self.vel += dt * force / self.m
@@ -81,26 +83,35 @@ ipc.start(3563)
 
 # square = Square(pos=np.array([0, 0], dtype=float))
 drone = Drone()
-target_pos = np.array([0.1, 5.0])
+target_pos = np.array([1.0, 8.0])
+
+
+
+file = open("sim_data.csv", "w", newline="")
+writer = csv.writer(file)
+
+# header
+writer.writerow(["t", "x", "y", "radians"])
+
 
 
 dt = 0.01
 t = 0
-sim_time = 10
+sim_time = 20
 running = True
 
 x_data = []
 y_data = []
 
-ipc.sendJSON({
-  "posx": 0.0,
-  "posy": 0.0,
-  "velx": 0.0,
-  "vely": 0.0,
-  "radians": 0.0,
-  "radians_rate": 0.0
-})
-res_json = ipc.recvJSON()
+# ipc.sendJSON({
+#   "posx": 0.0,
+#   "posy": 0.0,
+#   "velx": 0.0,
+#   "vely": 0.0,
+#   "radians": 0.0,
+#   "radians_rate": 0.0
+# })
+# res_json = ipc.recvJSON()
 # res_force = np.array([res_json["F1"], res_json["F2"]])
 
 while running:
@@ -116,6 +127,7 @@ while running:
   })
   res_json = ipc.recvJSON()
   commands = res_json["commands"]
+  
   if ("F1" in commands) and ("F2" in commands):
     drone.setFanThrust(commands["F1"], commands["F2"])
   
@@ -134,6 +146,7 @@ while running:
   
   x_data.append(drone.pos[0])
   y_data.append(drone.pos[1])
+  writer.writerow([t, drone.pos[0], drone.pos[1], drone.radians])
   
   if t >= sim_time:
     break
@@ -144,3 +157,5 @@ while running:
 plt.plot(x_data, y_data)
 plt.plot(target_pos[0], target_pos[1], "ro")
 plt.savefig("myfig.png")
+
+file.close()
