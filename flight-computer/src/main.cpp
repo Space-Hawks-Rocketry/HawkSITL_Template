@@ -40,10 +40,10 @@ int main() {
             float radians_rate = msg_json["radians_rate"].get<float>();
 
             std::cout << "\n(COMPUTER): Received sensor data -> " << std::format("px: {}, py: {}, vx: {}, vy: {}, radians: {}, radians_rate: {}", posx, posy, velx, vely, radians, radians_rate) << std::endl;
-
+            
             float k1;
             float k2;
-
+            
             k1 = 1;
             k2 = 1.5;
             float Fx = k1 * posx + k2 * velx;
