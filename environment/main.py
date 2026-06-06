@@ -6,7 +6,6 @@ import csv
 
 from framework.core.IPC_computer import IPC_Computer
 
-
 class Drone:
   
   def __init__(self, pos=np.zeros(2, dtype=float), vel=np.zeros(2, dtype=float), radians=0.0, radians_rate=0.0, m=1.0, I=1.0, width=2.0):

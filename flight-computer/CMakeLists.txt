@@ -13,5 +13,19 @@ add_executable(FlightComputer ${SOURCES})
 # Add necessary libraries
 target_link_libraries(FlightComputer PRIVATE zmq)
 
-# Add the include directory
-target_include_directories(FlightComputer PUBLIC include)
+
+# 1. Recursively find all header files (.h, .hpp, etc.)
+file(GLOB_RECURSE ALL_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+
+# 2. Extract unique directories from those file paths
+set(INCLUDE_DIRS "")
+foreach(HEADER_FILE ${ALL_HEADERS})
+    get_filename_component(HEADER_DIR ${HEADER_FILE} DIRECTORY)
+    list(APPEND INCLUDE_DIRS ${HEADER_DIR})
+endforeach()
+
+# 3. Remove duplicate directory paths
+list(REMOVE_DUPLICATES INCLUDE_DIRS)
+
+# 4. Add the directories to your target
+target_include_directories(FlightComputer PRIVATE ${INCLUDE_DIRS})
