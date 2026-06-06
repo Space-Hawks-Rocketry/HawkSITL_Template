@@ -6,24 +6,26 @@
 #include "flight_main.hpp"
 
 int main() {
+    /// Initiate computer<-->environment IPC
     IPC_Environment ipc;
     ipc.start(3563);
     
-    // FlightMain flight_main;
-    
+    /// Execute control steps between environment simulation steps.
     while (true) {
-        std::optional<json> msg_json_opt = ipc.recvJSON();
-        if (msg_json_opt) {
-            json msg_json = *msg_json_opt;
-            
-            // json response = flight_main.loop(msg_json);
-            json control_msg = loop(msg_json);
-            json response = {
-                {"control_msg", control_msg},
-                {"dt", dt}
-            };
-            ipc.sendJSON((json)response["commands"]);
-        }
+        /// Receive data (usually sensor data) from the external environment
+        std::optional<json> external_data_opt = ipc.recvJSON();
+        if (!external_data_opt)
+            continue;
+        json external_data = *external_data_opt;
+        
+        /// Execute this control step
+        ControlStep control_step = loop(external_data);
+
+        /// Send the control step back to the environment 
+        ipc.sendJSON({
+            {"control_msg", control_step.control_msg},
+            {"dt", control_step.dt}
+        });
     }
 
     return 0;

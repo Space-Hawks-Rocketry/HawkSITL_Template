@@ -52,8 +52,6 @@ file = open("sim_data.csv", "w", newline="")
 writer = csv.writer(file)
 writer.writerow(["t", "x", "y", "radians"])
 
-
-dt = 0.01
 t = 0
 sim_time = 20
 running = True
@@ -62,7 +60,6 @@ x_data = []
 y_data = []
 
 while running:
-  start_time = time()
   
   ipc.sendJSON({
     "posx": target_pos[0] - drone.pos[0],
@@ -73,7 +70,8 @@ while running:
     "radians_rate": drone.radians_rate
   })
   res_json = ipc.recvJSON()
-  commands = res_json["commands"]
+  commands = res_json["control_msg"]
+  dt = res_json["dt"]
   
   if ("F1" in commands) and ("F2" in commands):
     drone.setFanThrust(commands["F1"], commands["F2"])

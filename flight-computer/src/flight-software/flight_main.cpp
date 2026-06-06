@@ -21,12 +21,12 @@ float clamp(float val, float a, float b) {
     return min(b, max(a, val));
 }
 
-json setup(json external) {
-   
-    return {};
+ControlStep setup(json external) {
+    ControlStep control_step = {.control_msg = {}, .dt = 0.01};
+    return control_step;
 }
 
-json loop(json external_data) {
+ControlStep loop(json external_data) {
     float posx = external_data["posx"].get<float>();
     float posy = external_data["posy"].get<float>();
     float velx = external_data["velx"].get<float>();
@@ -79,29 +79,12 @@ json loop(json external_data) {
     float MAX_THRUST = 10;
     F1 = clamp(0.5 * (Fy / cos(radians) - force_diff), 0, MAX_THRUST);
     F2 = clamp(F1 + force_diff, 0, MAX_THRUST);
-    
-    std::cout << F1 << std::endl;
-    // json response = {
-    //     {"commands", {
-    //         {"F1", F1},
-    //         {"F2", F2}
-    //     }}
-    // };
-    json response = {
+
+    json control_msg = {
         {"F1", F1},
         {"F2", F2}
     };
 
-    // json response = {
-    //     {"stuff", {
-    //         {"commands", {
-    //             {"F1", F1},
-    //             {"F2", F2}
-    //         }}
-    //     }}
-    // };
-
-    return response;
-    // return (json)response["stuff"];
-    // return {};
+    ControlStep control_step = {.control_msg = control_msg, .dt = 0.01};
+    return control_step;
 }
