@@ -21,9 +21,10 @@ float clamp(float val, float a, float b) {
     return min(b, max(a, val));
 }
 
+
+
 ControlStep setup(json external) {
-    ControlStep control_step = {.control_msg = {}, .dt = 0.01};
-    return control_step;
+    return {.control_msg = {}, .dt = 0.01};;
 }
 
 ControlStep loop(json external_data) {
