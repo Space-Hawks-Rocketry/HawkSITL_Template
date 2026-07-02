@@ -6,10 +6,10 @@ build:
 
 run:
 	-pkill -f FlightComputer || true
-	-pkill -f "python3 environment/main.py" || true
+	-pkill -f "python3 environment/SITL_main.py" || true
 
 	./flight-computer/build/FlightComputer & \
-	python3 environment/main.py
+	python3 environment/SITL_main.py
 
 sitl:
 	$(MAKE) build
@@ -17,5 +17,5 @@ sitl:
 
 clean:
 	-pkill -f FlightComputer || true
-	-pkill -f "python3 environment/main.py" || true
+	-pkill -f "python3 environment/SITL_main.py" || true
 	rm -rf flight-computer/build
