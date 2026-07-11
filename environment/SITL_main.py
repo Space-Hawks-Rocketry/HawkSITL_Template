@@ -46,7 +46,7 @@ while running:
 
   t += computer_dt
 
-  if t >= sim_stop_time:
+  if (t >= sim_stop_time) and (sim_stop_time > 0):
     break
 
 SITL_finish(sitl_handle) # User-defined finish handler
