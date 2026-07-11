@@ -5,9 +5,9 @@ using json = nlohmann::json;
 typedef struct ControlStepTag {
     /// @brief Arbitary json object representing control commands to send to the environment sim.
     json control_msg;
-    /// @brief The time that this control step took to execute. For irl accuracy, this should correspond to the predicted amount of time your actual flight computer would take, NOT wall-clock execution time in the smulation.
-    double dt;
+    /// @brief The time that this function call took to execute. For irl accuracy, this should correspond to the predicted amount of time your actual flight computer would take.
+    double execution_time;
 } ControlStep;
 
-ControlStep setup(json external_data);
-ControlStep loop(json external_data);
+ControlStep setup(json sensor_data);
+ControlStep loop(json sensor_data);
