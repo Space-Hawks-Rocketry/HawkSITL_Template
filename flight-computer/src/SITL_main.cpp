@@ -1,15 +1,20 @@
 #include <stdio.h>
-#include "IPC_environment.hpp"
 #include <format>
 #include <iostream>
 #include <math.h>
+
+#include "toml.hpp"
+#include "IPC_environment.hpp"
 #include "flight_main.hpp"
 
-
 int main() {
+    /// Determine IPC port from sim-config.toml
+    toml::table toml_tbl = toml::parse_file("sim-config.toml");
+    int IPC_port = toml_tbl["IPC_port"].value_or(5400);
+
     /// Initiate computer<-->environment IPC
     IPC_Environment ipc;
-    ipc.start(3563);
+    ipc.start(IPC_port);
 
     /// Run flight setup as soon as sensor data becomes available
     while (true) {
@@ -24,7 +29,7 @@ int main() {
         /// Send the control step back to the environment 
         ipc.sendJSON({
             {"control_msg", control_step.control_msg},
-            {"dt", control_step.dt}
+            {"dt", control_step.execution_time}
         });
         // Beak now that setup has succesfully completed
         break;
@@ -43,7 +48,7 @@ int main() {
         /// Send the control step back to the environment 
         ipc.sendJSON({
             {"control_msg", control_step.control_msg},
-            {"dt", control_step.dt}
+            {"dt", control_step.execution_time}
         });
     }
 

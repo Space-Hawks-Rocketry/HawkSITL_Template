@@ -1,7 +1,6 @@
 #include "flight_main.hpp"
 
-/// [Helpful Tips]
-/// Treat the functions like the Arduino setup() and loop() functions. Sensor data
+/// Treat these functions like the Arduino setup() and loop() functions. Sensor data
 /// is given to you out-of-the-box instead of through your sensor firmware.
 
 ControlStep setup(json sensor_data) {
