@@ -11,15 +11,15 @@ int main() {
     IPC_Environment ipc;
     ipc.start(3563);
 
-    /// Run flight setup as soon as external data becomes available
+    /// Run flight setup as soon as sensor data becomes available
     while (true) {
         /// Try to receive environment data (usually sensor data)
-        std::optional<json> external_data_opt = (ipc).recvJSON();
-        if (!external_data_opt)
+        std::optional<json> sensor_data_opt = (ipc).recvJSON();
+        if (!sensor_data_opt)
             continue;
         
         /// Execute setup and get a control step back (if provided)
-        ControlStep control_step = setup(*external_data_opt);    
+        ControlStep control_step = setup(*sensor_data_opt);    
         
         /// Send the control step back to the environment 
         ipc.sendJSON({
@@ -32,13 +32,13 @@ int main() {
 
     /// Execute control loop
     while (true) {
-        /// Try to receive environment data (usually sensor data)
-        std::optional<json> external_data_opt = (ipc).recvJSON();
-        if (!external_data_opt)
+        /// Try to receive sensor data
+        std::optional<json> sensor_data_opt = (ipc).recvJSON();
+        if (!sensor_data_opt)
             continue;
         
         /// Execute this control step
-        ControlStep control_step = loop(*external_data_opt);    
+        ControlStep control_step = loop(*sensor_data_opt);    
         
         /// Send the control step back to the environment 
         ipc.sendJSON({
