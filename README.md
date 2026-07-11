@@ -3,6 +3,8 @@
 ## Table of Contents
 1. [What is SITL?](#what-is-sitl)
 2. [Intro to HawkSITL Template](#intro-to-hawksitl-template)
+3. [Setup and Installation](#setup-and-installation)
+4. [Usage (With Examples)](#usage-with-examples)
 
 ## What is SITL?
 SITL (or software-in-the-loop) is a type of simulation capable of testing flight software before ever launching. 
@@ -91,7 +93,7 @@ Make a repository from this template:
 - Press **Ctrl+Shift+P** in the opened VSCode instance, then run **Dev Containers: Reopen in Container**
 - You should be good to go.
 
-## Usage
+## Usage (With Examples)
 For now, refer to any of the example branches (may not be up to date):
 * [Hovering Cube](www.google.com)
 
