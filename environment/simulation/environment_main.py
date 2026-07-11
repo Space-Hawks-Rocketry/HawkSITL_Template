@@ -1,25 +1,26 @@
+from framework.core.SITL_handle import SITLHandle
 ## ------------------------------------------
-## Entry point to the environment simulation.
+## Entry point to the user-defined environment simulation.
 ## ------------------------------------------
 
-def SITL_setup():
-  '''Required SITL Func: Called before starting simulation.'''
+def SITL_setup(sitl: SITLHandle):
+  '''Called before starting simulation.'''
   pass
 
-def SITL_physicsUpdate(t, dt):
-  '''Required SITL Func: Called at each time step. Integrate physics forward by dt.'''
+def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
+  '''Called at each time step. Integrate physics forward by dt.'''
   pass
 
-def SITL_controlUpdate(control_msg: dict):
-  '''Required SITL Func: Called when a control message is received by flight computer. 
-    The control_msg structure is defined by flight software.'''
+def SITL_controlUpdate(sitl: SITLHandle, control_msg: dict):
+  '''Called when a control message is received from the simulated flight computer. 
+    The control_msg contents is defined by flight_main.cpp.'''
   pass
 
-def SITL_pollSensorData() -> dict:
-  '''Required SITL Func: Must return sensor data to be parsed by flight computer.
-    Returned dict structure is defined here and utilized by flight software.'''
+def SITL_pollSensorData(sitl: SITLHandle) -> dict:
+  '''Must return sensor data to be parsed by the simulated flight computer.
+    Returned dict structure is defined here and utilized by flight_main.cpp.'''
   return {}
   
-def SITL_finish():
-  '''Required SITL Func: Called upon finishing the simulation.'''
+def SITL_finish(sitl: SITLHandle):
+  '''Called immediately before stopping the simulation.'''
   pass
