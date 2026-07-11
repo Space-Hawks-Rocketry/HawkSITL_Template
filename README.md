@@ -65,4 +65,39 @@ Here are the directories that you should work within (ideally):
 
 ## Setup and Installation
 
-<img width="498" height="376" alt="image" src="https://github.com/user-attachments/assets/14e991cb-b095-4422-bbc4-01151b514093" />
+Before installing HawkSITL, ensure the following software is installed.
+
+### Required Software
+Install these if they are not already installed:
+* Git (also, configure GitHub SSH authentication)
+* **For Windows:** WSL w/ Unbuntu-24.04 (follow this guide: https://ubuntu.com/wsl/docs/stable/howto/install-ubuntu-wsl2/)
+* Docker Desktop
+* Visual Studio Code
+
+### Required VS Code Extensions
+Install the following Visual Studio Code extensions:
+
+* Dev Containers
+* WSL (Windows only)
+
+### Setting Up an SITL Project
+Make a repository from this template:
+
+<img width="249" height="188" alt="image" src="https://github.com/user-attachments/assets/14e991cb-b095-4422-bbc4-01151b514093" />
+
+**Next:**
+- Clone your repo into WSL (for Windows) or anywhere (for MacOS)
+- In a terminal, navigate into the cloned repo's folder and run: ``` code . ```
+- Press **Ctrl+Shift+P** in the opened VSCode instance, then run **Dev Containers: Reopen in Container**
+- You should be good to go.
+
+## Usage
+For now, refer to any of the example branches (may not be up to date):
+* [Hovering Cube](www.google.com)
+
+### Important Commands
+Run these within your project directory:
+* To build flight computer code: ```make build```
+* To run simulation: ```make run```
+* To build, then run simulation: ```make sitl```
+* To clean project build: ```make clean```
