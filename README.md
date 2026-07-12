@@ -2,8 +2,8 @@
 #### Imagine a cube with these properties:
 * A flight computer inside.
 * Two error-prone altimeters:
-  * Altimeter 1 @ 5Hz, with an undetermined variance.
-  * Altimeter 2 @ 30Hz, with an undetermined variance much larger than altimeter 1's.
+  * Altimeter 1 @ 30Hz, with an undetermined variance.
+  * Altimeter 2 @ 5Hz, with an undetermined variance much larger than altimeter 1's.
 * 4 evenly space thrusters on the bottom, each with a max force of 15N.
   * The valves are cheap, and their actual state ("openess") has a 0.0025 variance from the control state.
 
