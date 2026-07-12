@@ -1,18 +1,17 @@
-#include "flight_main.hpp"
+#include "framework/core/flight_main.hpp"
 #include <iostream>
 
 /// Treat these functions like the Arduino setup() and loop() functions. Sensor data
 /// is given to you out-of-the-box instead of through your sensor firmware.
 
-#include <vector>
-#include <numeric>
-#include <stdexcept>
+#include "simulation/Eigen/Dense"
 
 //// Define constants
 const float THRUSTER_MAX_OUTPUT = 15.0; // Newtons
 const float CUBE_MASS = 1.0; // kg
 const float GRAV_ACCEL = -9.8; // m/s/s
 const float TARGET_ALTITUDE = 5; // m 
+const float KNOWN_THROTTLE_VARIANCE = 0.0025; // Defined in FlyingCube model by throttle std
 // The speed at which this computer will process control steps
 const float LOOP_FREQUENCY_HZ = 100.0;
 const float LOOP_DT = 1 / LOOP_FREQUENCY_HZ;
@@ -31,7 +30,10 @@ enum FlightStatus {
 };
 FlightStatus flight_status = FlightStatus::CALIBRATING;
 
+/// Predicted state
+float altitude_estimate = TARGET_ALTITUDE; // assume we're where we want to be at first (so we don't move)
 
+/* Collect altitude samples during calibration to find variance later. */
 void collectCalibrationSamples(json sensor_data) {
     if (sensor_data.contains("altitude1")) {
         calib_alt1_samples.push_back(sensor_data["altitude1"]);
@@ -41,6 +43,7 @@ void collectCalibrationSamples(json sensor_data) {
     }
 }
 
+/* Calculate variance from collected calibration samples. */
 void calcCalibrationVariances() {
     int alt1_sample_count = calib_alt1_samples.size();
     int alt2_sample_count = calib_alt2_samples.size();
@@ -57,14 +60,21 @@ void calcCalibrationVariances() {
 
     //// Calculate variances
     for (float alt_sample : calib_alt1_samples) {
-        alt1_variance += (alt_sample - alt1_mean) * (alt_sample - alt1_mean) / alt1_sample_count;
+        alt1_variance += powf(alt_sample - alt1_mean, 2) / alt1_sample_count;
     }
     for (float alt_sample : calib_alt2_samples) {
-        alt2_variance += (alt_sample - alt2_mean) * (alt_sample - alt2_mean) / alt2_sample_count;
+        alt2_variance += powf(alt_sample - alt2_mean, 2) / alt2_sample_count;
     }
+}
 
-    std::cout << alt1_variance << std::endl;
-    std::cout << alt2_variance << std::endl;
+/* Update altitude_estimate based on available sensor data and thruster throttle. */
+void updateAltitudeEstimate(json sensor_data, float total_thruster_throttle) {
+    // Calculate controlled acceleration
+    float predicted_accel = GRAV_ACCEL + (THRUSTER_MAX_OUTPUT / CUBE_MASS) * total_thruster_throttle;
+    // Calculate variance (error) in predicted acceleration (look up error propogation for variance)
+    float predicted_accel_variance = 4 * powf(THRUSTER_MAX_OUTPUT / CUBE_MASS, 2) * KNOWN_THROTTLE_VARIANCE;
+
+    
 }
 
 

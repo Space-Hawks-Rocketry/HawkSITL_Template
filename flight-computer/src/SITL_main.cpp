@@ -10,9 +10,9 @@
 #include <iostream>
 #include <math.h>
 
-#include "toml.hpp"
-#include "IPC_environment.hpp"
-#include "flight_main.hpp"
+#include "framework/core/toml.hpp"
+#include "framework/core/IPC_environment.hpp"
+#include "framework/core/flight_main.hpp"
 
 int main() {
     /// Determine IPC port from sim-config.toml
