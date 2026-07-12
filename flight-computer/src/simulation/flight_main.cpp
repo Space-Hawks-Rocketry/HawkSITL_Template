@@ -1,10 +1,10 @@
 #include "framework/core/flight_main.hpp"
 #include <iostream>
 
+#include "simulation/kalman_alt_estimator.hpp"
+
 /// Treat these functions like the Arduino setup() and loop() functions. Sensor data
 /// is given to you out-of-the-box instead of through your sensor firmware.
-
-#include "simulation/Eigen/Dense"
 
 //// Define constants
 const float THRUSTER_MAX_OUTPUT = 15.0; // Newtons
@@ -74,7 +74,17 @@ void updateAltitudeEstimate(json sensor_data, float total_thruster_throttle) {
     // Calculate variance (error) in predicted acceleration (look up error propogation for variance)
     float predicted_accel_variance = 4 * powf(THRUSTER_MAX_OUTPUT / CUBE_MASS, 2) * KNOWN_THROTTLE_VARIANCE;
 
-    
+    // float u = predicted_accel;
+
+    // Matrix2d A;
+    // A << 1, LOOP_DT,
+    //      0, 1;
+
+    // Vector2d B(
+    //     powf(LOOP_DT, 2) / 2,
+    //     LOOP_DT
+    // );
+
 }
 
 
