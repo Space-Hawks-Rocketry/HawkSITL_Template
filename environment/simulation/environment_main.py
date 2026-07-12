@@ -57,11 +57,11 @@ def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
   ## Suspend cube until it's finished calibrating
   if is_cube_suspended:
     cube.height = CUBE_START_HEIGHT
+    cube.vel = 0
   
   ## Keep track of sim data
   t_data.append(t)
   cube_height_data.append(cube.height)
-  cube_altimeter_data.append(altimeter1.measure())
   
   ## Stop the sim if the cube hits the ground (height=0)
   if cube.height <= 0:
@@ -72,6 +72,7 @@ def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
 def SITL_controlUpdate(sitl: SITLHandle, control_msg: dict):
   '''Called when a control message is received from the simulated flight computer. 
     The control_msg contents is defined by flight_main.cpp.'''
+  global is_cube_suspended
   
   ## Listen to flight status signals
   if "flight_status" in control_msg:  
@@ -108,8 +109,7 @@ def SITL_finish(sitl: SITLHandle):
   '''Called immediately before stopping the simulation.'''
   ## Plot sim data for visualization
   plt.plot(t_data, cube_height_data)
-  # plt.plot(t_data, cube_altimeter_data)
-  plt.plot(alt_t_data, alt_est_data)
+  # plt.plot(alt_t_data, alt_est_data)
   
   plt.title("Flying Cube")
   plt.xlabel("Time (s)")
