@@ -12,6 +12,7 @@ class Altimeter:
         self.time_until_next_measurement = 0.0
         
         self.altitude_measurement = 0.0
+        self.is_ready = True  # Is new measurement ready
         
     def update(self, true_altitude, dt):
         ## Introduce random walking bias (bias instability)
@@ -23,10 +24,16 @@ class Altimeter:
             white_noise = self.rng.normal(loc=0, scale=self.white_noise_std)
             self.altitude_measurement = true_altitude + white_noise + self.bias_instability
             self.time_until_next_measurement = 1.0 / self.sample_rate
+            self.is_ready = True
             
         self.time_until_next_measurement -= dt
         
+    def isReady(self) -> bool:
+        '''Return true if ready for the next measurement.'''
+        return self.is_ready
+        
     def measure(self) -> float:
         '''Measure flawed altimeter altitude based on sim-truth altitude.'''
+        self.is_ready = False
         return self.altitude_measurement
         

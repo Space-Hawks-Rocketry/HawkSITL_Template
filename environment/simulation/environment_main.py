@@ -90,12 +90,18 @@ def SITL_controlUpdate(sitl: SITLHandle, control_msg: dict):
 def SITL_createSensorData(sitl: SITLHandle) -> dict:
   '''Must return sensor data to be parsed by the simulated flight computer.
     Returned dict structure is defined here and utilized by flight_main.cpp.'''
-  return {
-    "altitude1": altimeter1.measure(),
-    "altitude2": altimeter2.measure(),
+  data =  {
     "altimeter_status": [altimeter1_status, altimeter2_status],
     "thruster_status": cube.thruster_status
   }
+  
+  ## Add sensor data if new measurements are available
+  if altimeter1.isReady():
+    data["altitude1"] = altimeter1.measure()
+  if altimeter2.isReady():
+    data["altitude2"] = altimeter2.measure()
+  
+  return data
   
   
 def SITL_finish(sitl: SITLHandle):
