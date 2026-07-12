@@ -30,7 +30,7 @@ class FlyingCube:
         # Detect imbalance (and report)
         if (active_throttles[0] != active_throttles[2]) or (active_throttles[1] != active_throttles[3]):
             print("[CUBE SIM WARNING]: Flying cube is unstable. Simulation values no longer reflect real behavior.")
-        
+            
         thruster_forces = active_throttles * self.max_thruster_force
         net_thrust_force = np.sum(thruster_forces)
         net_force = self.m * -9.8 + net_thrust_force   # Total force on cube including gravity

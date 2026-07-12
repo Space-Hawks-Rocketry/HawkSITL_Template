@@ -48,11 +48,12 @@ while running:
   remaining_dt = computer_dt
   while remaining_dt > target_dt:
     SITL_physicsUpdate(sitl_handle, t, target_dt) # User-defined physics update
+    sitl_handle._update(t, target_dt) # Update handle
     remaining_dt -= target_dt
   SITL_physicsUpdate(sitl_handle, t, remaining_dt) # User-defined physics update
+  sitl_handle._update(t, remaining_dt) # Update handle
 
   t += computer_dt
-  sitl_handle.t = t
 
   if (t >= sim_stop_time) and (sim_stop_time > 0):
     break

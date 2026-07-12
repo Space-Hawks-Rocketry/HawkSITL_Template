@@ -3,17 +3,19 @@ from framework.core.SITL_handle import SITLHandle
 ## Entry point to the user-defined environment simulation.
 ## ------------------------------------------
 import matplotlib.pyplot as plt
+from random import randint
 from .models.flying_cube import FlyingCube
 from .models.altimeter import Altimeter
 
-# Create the cube!!
+## Create the cube!!
 cube = FlyingCube(initial_height=20)
-altimeter1 = Altimeter(sample_rate=5, white_noise_std=0.1, instability_rate_std=0.01)
+## Create the sensors
+altimeter1 = Altimeter(sample_rate=30, white_noise_std=0.1, instability_rate_std=0.01)
 altimeter2 = Altimeter(sample_rate=5)
 altimeter1_status = True  # True means working
 altimeter2_status = True  # True means working
 
-## Sim data to be propogated over time and then plotted
+## Sim data to be plotted
 t_data = []
 cube_height_data = []
 cube_altimeter_data = []
@@ -21,15 +23,28 @@ alt_est_data = []
 alt_t_data = []
 
 
+def injectThrusterFailure():
+  '''Fail random thruster out of the 4.'''
+  thruster_fail_index = randint(0, 3)
+  cube.setThrusterStatus(thruster_fail_index, False)
+  
+def injectAltimeterFailure():
+  '''Fail altimeter 1 (the better one).'''
+  global altimeter1_status
+  altimeter1_status = False
+
+
 def SITL_setup(sitl: SITLHandle):
   '''Called before starting simulation.'''
-  pass
+  ## Schedule events
+  sitl.scheduleAtTime(20, injectThrusterFailure)
+  sitl.scheduleAtTime(40, injectAltimeterFailure)
 
 def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
   '''Called at each time step. Integrate physics forward by dt.'''
   global cube, t_data, cube_height_data, altimeter1_status
   
-  ## Update sensors
+  ## Update models
   altimeter1.update(cube.height, dt)
   altimeter2.update(cube.height, dt)
   
@@ -42,10 +57,6 @@ def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
   if cube.height <= 0:
     print("CONTROL FAILURE: Hit the ground, ur dead!")
     sitl.stop()
-  
-  ## Break altimeter1 @ t=35s
-  if (t >= 35) and (t <= 35.5):
-    altimeter1_status = False
   
   cube.update(dt) # Progress the cube forward in time by dt
 
