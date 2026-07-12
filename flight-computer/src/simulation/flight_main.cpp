@@ -9,6 +9,8 @@ const float CUBE_MASS = 1.0; // kg
 const float GRAV_ACCEL = -9.8; // m/s/s
 const float TARGET_ALTITUDE = 5; // m 
 
+float alt1_calib_samples[20];
+
 #pragma once
 
 #include <vector>

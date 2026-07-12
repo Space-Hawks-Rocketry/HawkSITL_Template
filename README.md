@@ -21,7 +21,7 @@
   * This requires good altitude estimation.
 
 #### Strategy
-* Use a state machine that switches between "Calibrating", "Ready", and "Armed"
+* Use a state machine that switches between "CALIBRATING" and "READY"
 * Determine altimeter variances during calibration stage.
   * Their relative accuracies will be used for Kalman filtering and weighted averaging.
 * Use a Kalman filter for altitude estimation that combines altimeters with known-ish thrust magnitude.

@@ -2,17 +2,20 @@ import numpy as np
 
 class FlyingCube:
     
-    def __init__(self, m=1, initial_height=0, initial_velocity=0, max_thruster_force_newtons=15):
+    def __init__(self, m=1, initial_height=0, initial_velocity=0, max_thruster_force_newtons=15, throttle_std=0.05):
         self.m = m
         self.height = initial_height
         self.vel = initial_velocity
         self.max_thruster_force = max_thruster_force_newtons
+        self.throttle_std = throttle_std
 
         # The throttles (between 0 and 1) of thrusters 1-4.
         # If the first number is 1, it means T1 is at max throttle.
         self.thruster_throttles = np.array([0.0, 0.0, 0.0, 0.0])
         # "False" status means thruster has failed and cannot be used
         self.thruster_status = [True, True, True, True]
+        
+        self.rng = np.random.default_rng() # random number generator
 
     def setThrusterStatus(self, thruster_index: int, status: bool):
         '''Disable/enable a thruster. First thruster has index of 0.'''
@@ -20,7 +23,9 @@ class FlyingCube:
 
     def setThrottles(self, thruster_throttles: list):
         '''Set throttles (each between 0 and 1) of each thruster. Use array with length 4.'''
-        self.thruster_throttles = np.clip(thruster_throttles, 0.0, 1.0)
+        # Apply white noise to valve opening (throttle)
+        throttle_error = self.rng.normal(loc=0.0, scale=self.throttle_std) * np.ones(4)
+        self.thruster_throttles = np.clip(thruster_throttles + throttle_error, 0.0, 1.0)
         
     def update(self, dt):
         '''Integrate model flying cub emodel forward in time by dt seconds.'''
