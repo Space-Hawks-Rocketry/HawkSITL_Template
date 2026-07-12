@@ -1,7 +1,7 @@
 # Hovering Cube Example
 #### Imagine a cube with these properties:
 * A flight computer inside.
-* Two error-prone altimeters (each accurate to +/- ~1m)
+* Two error-prone altimeters (each accurate to +/- ~2m, sample rate = 5Hz)
 * 4 evenly space thrusters on the bottom, each with a max force.
 
 <img width="321" height="322" alt="image" src="https://github.com/user-attachments/assets/c8496521-2e77-46e7-8d6b-7d79df5d5e7d" />
