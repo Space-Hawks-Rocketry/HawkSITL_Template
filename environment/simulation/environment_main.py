@@ -8,7 +8,7 @@ from .models.altimeter import Altimeter
 
 # Create the cube!!
 cube = FlyingCube(initial_height=20)
-altimeter1 = Altimeter(sample_rate=5)
+altimeter1 = Altimeter(sample_rate=5, white_noise_std=0.1, instability_rate_std=0.01)
 altimeter2 = Altimeter(sample_rate=5)
 altimeter1_status = True  # True means working
 altimeter2_status = True  # True means working
@@ -17,6 +17,8 @@ altimeter2_status = True  # True means working
 t_data = []
 cube_height_data = []
 cube_altimeter_data = []
+alt_est_data = []
+alt_t_data = []
 
 
 def SITL_setup(sitl: SITLHandle):
@@ -25,7 +27,7 @@ def SITL_setup(sitl: SITLHandle):
 
 def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
   '''Called at each time step. Integrate physics forward by dt.'''
-  global cube, t_data, cube_height_data
+  global cube, t_data, cube_height_data, altimeter1_status
   
   ## Update sensors
   altimeter1.update(cube.height, dt)
@@ -38,7 +40,12 @@ def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
   
   ## Stop the sim if the cube hits the ground (height=0)
   if cube.height <= 0:
+    print("CONTROL FAILURE: Hit the ground, ur dead!")
     sitl.stop()
+  
+  ## Break altimeter1 @ t=35s
+  if (t >= 35) and (t <= 35.5):
+    altimeter1_status = False
   
   cube.update(dt) # Progress the cube forward in time by dt
 
@@ -49,6 +56,8 @@ def SITL_controlUpdate(sitl: SITLHandle, control_msg: dict):
   ## Update thruster throttles if the flight computer commands it
   if "thruster_throttles" in control_msg:
     cube.setThrottles(control_msg["thruster_throttles"])
+    alt_est_data.append(control_msg["alt_estimate"])
+    alt_t_data.append(sitl.t)
 
 def SITL_createSensorData(sitl: SITLHandle) -> dict:
   '''Must return sensor data to be parsed by the simulated flight computer.
@@ -59,12 +68,19 @@ def SITL_createSensorData(sitl: SITLHandle) -> dict:
     "altimeter_status": [altimeter1_status, altimeter2_status],
     "thruster_status": cube.thruster_status
   }
+  # return {
+  #   "altitude1": cube.height,
+  #   "altitude2": cube.height,
+  #   "altimeter_status": [altimeter1_status, altimeter2_status],
+  #   "thruster_status": cube.thruster_status
+  # }
   
 def SITL_finish(sitl: SITLHandle):
   '''Called immediately before stopping the simulation.'''
   ## Plot sim data for visualization
   plt.plot(t_data, cube_height_data)
-  plt.plot(t_data, cube_altimeter_data)
+  # plt.plot(t_data, cube_altimeter_data)
+  # plt.plot(alt_t_data, alt_est_data)
   
   plt.title("Flying Cube")
   plt.xlabel("Time (s)")

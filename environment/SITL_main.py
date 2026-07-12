@@ -52,6 +52,7 @@ while running:
   SITL_physicsUpdate(sitl_handle, t, remaining_dt) # User-defined physics update
 
   t += computer_dt
+  sitl_handle.t = t
 
   if (t >= sim_stop_time) and (sim_stop_time > 0):
     break
