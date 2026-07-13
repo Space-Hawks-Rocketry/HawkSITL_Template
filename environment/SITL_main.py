@@ -47,11 +47,14 @@ while running:
 
   remaining_dt = computer_dt
   while remaining_dt > target_dt:
-    SITL_physicsUpdate(sitl_handle, t, target_dt) # User-defined physics update
-    sitl_handle._update(t, target_dt) # Update handle
+    actual_t = t + computer_dt - remaining_dt
+    
+    SITL_physicsUpdate(sitl_handle, actual_t, target_dt) # User-defined physics update
+    sitl_handle._update(actual_t, target_dt) # Update handle
     remaining_dt -= target_dt
-  SITL_physicsUpdate(sitl_handle, t, remaining_dt) # User-defined physics update
-  sitl_handle._update(t, remaining_dt) # Update handle
+  actual_t = t + computer_dt - remaining_dt
+  SITL_physicsUpdate(sitl_handle, actual_t, remaining_dt) # User-defined physics update
+  sitl_handle._update(actual_t, remaining_dt) # Update handle
 
   t += computer_dt
 

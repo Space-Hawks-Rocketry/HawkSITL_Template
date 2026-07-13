@@ -25,16 +25,25 @@ class FlyingCube:
         '''Set throttles (each between 0 and 1) of each thruster. Use array with length 4.'''
         # Apply white noise to valve opening (throttle)
         throttle_error = self.rng.normal(loc=0.0, scale=self.throttle_std) * np.ones(4)
+        ## Assume valves can reliably close.
+        for i in range(throttle_error.size):
+            if thruster_throttles[i] == 0:
+                throttle_error[i] = 0
+        
         self.thruster_throttles = np.clip(thruster_throttles + throttle_error, 0.0, 1.0)
         
-    def update(self, dt):
+        
+    def update(self, t, dt):
         '''Integrate model flying cub emodel forward in time by dt seconds.'''
         # Throttles after taking into account thruster status
+        
         active_throttles = self.thruster_throttles * self.thruster_status
         
+        
         # Detect imbalance (and report)
-        if (active_throttles[0] != active_throttles[2]) or (active_throttles[1] != active_throttles[3]):
-            print("[CUBE SIM WARNING]: Flying cube is unstable. Simulation values no longer reflect real behavior.")
+        if ((abs(active_throttles[0] - active_throttles[2]) > 0.001) or 
+            (abs(active_throttles[1] - active_throttles[3]) > 0.001)):
+            print(f"[CUBE SIM WARNING]: (t={round(t,3)}) Flying cube is unstable. Simulation values no longer reflect real behavior.")
             
         thruster_forces = active_throttles * self.max_thruster_force
         net_thrust_force = np.sum(thruster_forces)

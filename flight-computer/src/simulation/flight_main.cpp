@@ -1,6 +1,6 @@
 #include "framework/core/flight_main.hpp"
 #include <iostream>
-
+#include <numeric>
 #include "simulation/kalman_alt_estimator.hpp"
 
 /// Treat these functions like the Arduino setup() and loop() functions. Sensor data
@@ -8,6 +8,7 @@
 
 //// Define constants
 const float THRUSTER_MAX_OUTPUT = 15.0; // Newtons
+const float SUSPENDED_ALTITUDE = 20.0; // The altitude that the cube is initially suspended at (influences initial alt est)
 const float CUBE_MASS = 1.0; // kg
 const float GRAV_ACCEL = -9.8; // m/s/s
 const float TARGET_ALTITUDE = 5; // m 
@@ -15,6 +16,8 @@ const float KNOWN_THROTTLE_VARIANCE = 0.0025; // Defined in FlyingCube model by 
 // The speed at which this computer will process control steps
 const float LOOP_FREQUENCY_HZ = 100.0;
 const float LOOP_DT = 1 / LOOP_FREQUENCY_HZ;
+// Calculate variance (error) in estimated acceleration (look up error propogation for variance)
+float ACCEL_EST_VARIANCE = 4 * powf(THRUSTER_MAX_OUTPUT / CUBE_MASS, 2) * KNOWN_THROTTLE_VARIANCE;
 
 //// Calibration samples and results
 float remaining_calibration_time = 5; // seconds
@@ -30,8 +33,12 @@ enum FlightStatus {
 };
 FlightStatus flight_status = FlightStatus::CALIBRATING;
 
-/// Predicted state
-float altitude_estimate = TARGET_ALTITUDE; // assume we're where we want to be at first (so we don't move)
+//// Predicted state
+KalmanAltEstimator altitude_estimator(SUSPENDED_ALTITUDE);
+float altitude_estimate = SUSPENDED_ALTITUDE;
+
+//// Keep track of thruster throttles (to feed into Kalman altitude estimator)
+std::vector<float> thruster_throttles = {0.0, 0.0, 0.0, 0.0};
 
 /* Collect altitude samples during calibration to find variance later. */
 void collectCalibrationSamples(json sensor_data) {
@@ -70,22 +77,49 @@ void calcCalibrationVariances() {
 /* Update altitude_estimate based on available sensor data and thruster throttle. */
 void updateAltitudeEstimate(json sensor_data, float total_thruster_throttle) {
     // Calculate controlled acceleration
-    float predicted_accel = GRAV_ACCEL + (THRUSTER_MAX_OUTPUT / CUBE_MASS) * total_thruster_throttle;
-    // Calculate variance (error) in predicted acceleration (look up error propogation for variance)
-    float predicted_accel_variance = 4 * powf(THRUSTER_MAX_OUTPUT / CUBE_MASS, 2) * KNOWN_THROTTLE_VARIANCE;
+    float accel_est = GRAV_ACCEL + (THRUSTER_MAX_OUTPUT / CUBE_MASS) * total_thruster_throttle;
 
-    // float u = predicted_accel;
+    altitude_estimator.predict(accel_est, LOOP_DT);
 
-    // Matrix2d A;
-    // A << 1, LOOP_DT,
-    //      0, 1;
+    if (sensor_data.contains("altitude1")) {
+        float altitude_measurement = sensor_data["altitude1"];
+        altitude_estimator.updateAltimeter1(altitude_measurement);
+    }
+    if (sensor_data.contains("altitude2")) {
+        float altitude_measurement = sensor_data["altitude2"];
+        altitude_estimator.updateAltimeter2(altitude_measurement);
+    }
 
-    // Vector2d B(
-    //     powf(LOOP_DT, 2) / 2,
-    //     LOOP_DT
-    // );
-
+    altitude_estimate = altitude_estimator.estimated_state(0);
 }
+
+std::vector<float> determineThrusterThrottles(std::vector<bool> thruster_status) {
+    // Thrusters 1, 2, 3, 4  (must be between 0-1)
+    std::vector<float> thruster_throttles = {0.0, 0.0, 0.0, 0.0};
+    
+    //// Determine throttle needed to hover
+    float hover_force = CUBE_MASS * (-GRAV_ACCEL); // force required to hover
+    float hover_throttle = (hover_force / THRUSTER_MAX_OUTPUT) / 4; // throttle required for a single thruster to in order to hover
+    
+    //// PID controller for throttle determination
+    float k_P = 0.02;
+    float k_D = 0.03;
+    float P_error = TARGET_ALTITUDE - altitude_estimator.estimated_state[0];
+    float D_error = 0.0 - altitude_estimator.estimated_state[1];
+    // Throttle for a single thruster (assuming all are online). Bias for a hover.
+    float single_throttle = k_P * P_error + k_D * D_error + hover_throttle;
+
+    thruster_throttles = {single_throttle,single_throttle,single_throttle,single_throttle};
+
+    //// Handle bad thrusters
+    if (!thruster_status[0] || !thruster_status[2]) {
+        thruster_throttles = {0, 2*single_throttle, 0, 2*single_throttle};
+    } else if (!thruster_status[1] || !thruster_status[3]) {
+        thruster_throttles = {2*single_throttle, 0, 2*single_throttle, 0};
+    }
+
+    return thruster_throttles;
+} 
 
 
 ControlStep setup(json sensor_data) {
@@ -104,12 +138,20 @@ ControlStep loop(json sensor_data) {
         } else{
             // finished collecting calibration samples
             calcCalibrationVariances();
+            altitude_estimator.setVariances(alt1_variance, alt2_variance, ACCEL_EST_VARIANCE);
+
             flight_status = FlightStatus::READY;
             control_msg["flight_status"] = "READY";
         }
         remaining_calibration_time -= LOOP_DT;
         break;
     case FlightStatus::READY:
+        float total_thruster_throttle = thruster_throttles[0] + thruster_throttles[1] + thruster_throttles[2] + thruster_throttles[3];        
+        updateAltitudeEstimate(sensor_data, total_thruster_throttle);
+        control_msg["alt_estimate"] = altitude_estimate;
+        std::vector<bool> thruster_status = sensor_data["thruster_status"];
+        thruster_throttles = determineThrusterThrottles(thruster_status);
+        control_msg["thruster_throttles"] = thruster_throttles;
         break;
     }
 

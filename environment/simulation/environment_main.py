@@ -52,7 +52,7 @@ def SITL_physicsUpdate(sitl: SITLHandle, t: float, dt: float):
   ## Update models
   altimeter1.update(cube.height, dt)
   altimeter2.update(cube.height, dt)
-  cube.update(dt)
+  cube.update(t, dt)
   
   ## Suspend cube until it's finished calibrating
   if is_cube_suspended:
@@ -84,6 +84,8 @@ def SITL_controlUpdate(sitl: SITLHandle, control_msg: dict):
   ## Update thruster throttles if the flight computer commands it
   if "thruster_throttles" in control_msg:
     cube.setThrottles(control_msg["thruster_throttles"])
+    
+  if "alt_estimate" in control_msg:
     alt_est_data.append(control_msg["alt_estimate"])
     alt_t_data.append(sitl.t)
 
@@ -109,7 +111,7 @@ def SITL_finish(sitl: SITLHandle):
   '''Called immediately before stopping the simulation.'''
   ## Plot sim data for visualization
   plt.plot(t_data, cube_height_data)
-  # plt.plot(alt_t_data, alt_est_data)
+  plt.plot(alt_t_data, alt_est_data)
   
   plt.title("Flying Cube")
   plt.xlabel("Time (s)")
