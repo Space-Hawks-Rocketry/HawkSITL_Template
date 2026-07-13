@@ -103,7 +103,7 @@ std::vector<float> determineThrusterThrottles(std::vector<bool> thruster_status)
     
     //// PID controller for throttle determination
     float k_P = 0.02;
-    float k_D = 0.03;
+    float k_D = 0.04;
     float P_error = TARGET_ALTITUDE - altitude_estimator.estimated_state[0];
     float D_error = 0.0 - altitude_estimator.estimated_state[1];
     // Throttle for a single thruster (assuming all are online). Bias for a hover.
@@ -139,6 +139,12 @@ ControlStep loop(json sensor_data) {
             // finished collecting calibration samples
             calcCalibrationVariances();
             altitude_estimator.setVariances(alt1_variance, alt2_variance, ACCEL_EST_VARIANCE);
+
+            //// Log calculated variances
+            std::cout << "---------- Calibration Results ----------" << std::endl;
+            std::cout << "Altimeter 1 Standard Dev. (m): " << sqrt(alt1_variance) << std::endl;
+            std::cout << "Altimeter 2 Standard Dev. (m): " << sqrt(alt2_variance) << std::endl;
+            std::cout << "Accel. Estimate Standard Dev. (m/s^2): " << sqrt(ACCEL_EST_VARIANCE) << std::endl << std::endl;
 
             flight_status = FlightStatus::READY;
             control_msg["flight_status"] = "READY";
