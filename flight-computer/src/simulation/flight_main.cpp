@@ -81,11 +81,13 @@ void updateAltitudeEstimate(json sensor_data, float total_thruster_throttle) {
 
     altitude_estimator.predict(accel_est, LOOP_DT);
 
-    if (sensor_data.contains("altitude1")) {
+    std::vector<bool> altimeter_status = sensor_data["altimeter_status"];
+
+    if (sensor_data.contains("altitude1") && altimeter_status[0]) {
         float altitude_measurement = sensor_data["altitude1"];
         altitude_estimator.updateAltimeter1(altitude_measurement);
     }
-    if (sensor_data.contains("altitude2")) {
+    if (sensor_data.contains("altitude2") && altimeter_status[1]) {
         float altitude_measurement = sensor_data["altitude2"];
         altitude_estimator.updateAltimeter2(altitude_measurement);
     }
