@@ -95,7 +95,8 @@ Make a repository from this template:
 
 ## Usage (With Examples)
 For now, refer to any of the example branches (may not be up to date):
-* [Hovering Cube](www.google.com)
+* <a href="https://github.com/Space-Hawks-Rocketry/HawkSITL_Template/tree/example/hovering-cube">Hovering Cube</a>
+
 
 ### Important Commands
 Run these within your project directory:
