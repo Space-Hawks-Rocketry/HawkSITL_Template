@@ -110,10 +110,11 @@ def SITL_createSensorData(sitl: SITLHandle) -> dict:
 def SITL_finish(sitl: SITLHandle):
   '''Called immediately before stopping the simulation.'''
   ## Plot sim data for visualization
-  plt.plot(t_data, cube_height_data)
-  plt.plot(alt_t_data, alt_est_data)
+  plt.plot(t_data, cube_height_data, label="Sim-truth Altitude")
+  plt.plot(alt_t_data, alt_est_data, label="Kalman Altitude")
   
   plt.title("Flying Cube")
   plt.xlabel("Time (s)")
   plt.ylabel("Cube Height (m)")
+  plt.legend()
   plt.show()
