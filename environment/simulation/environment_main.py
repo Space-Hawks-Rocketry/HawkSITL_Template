@@ -110,11 +110,29 @@ def SITL_createSensorData(sitl: SITLHandle) -> dict:
 def SITL_finish(sitl: SITLHandle):
   '''Called immediately before stopping the simulation.'''
   ## Plot sim data for visualization
-  plt.plot(t_data, cube_height_data, label="Sim-truth Altitude")
-  plt.plot(alt_t_data, alt_est_data, label="Kalman Altitude")
+  plt.rcParams.update({'font.size': 14})
+  
+  plt.plot(alt_t_data, alt_est_data, label="Kalman Altitude", color="#2eb333")
+  plt.plot(t_data, cube_height_data, label="Sim-truth Altitude", linewidth=2,  linestyle="--")
+  
   
   plt.title("Flying Cube")
+  
+  plt.axvline(x=5, color='#051026', linestyle=':', linewidth=2)
+  plt.text(5, 10, ' End Calibration', color='#051026', fontsize=12)
+  
+  plt.axvline(x=20, color='#051026', linestyle=':', linewidth=2)
+  plt.text(20, 10, ' Single Thruster Failure', color='#051026', fontsize=12)
+  
+  plt.axvline(x=40, color='#051026', linestyle=':', linewidth=2)
+  plt.text(40, 10, ' Altimeter 1 Failure', color='#051026', fontsize=12)
+
+  plt.gcf().autofmt_xdate()
+  
+  
+  
   plt.xlabel("Time (s)")
   plt.ylabel("Cube Height (m)")
+  
   plt.legend()
   plt.show()
