@@ -10,6 +10,8 @@ This example demonstrates the following techniques:
 * Driving environment dynamics with control commands received from the flight computer (closed-loop SITL).
 * Combining sensor measurements in a Kalman filter to estimate altitude.
 * Using a PD controller to control thrusters for targeted hovering.
+* Implementing a very basic state machine into a flight computer.
+* Measuring sensor variance during calibration.
 * Saving and plotting simulation data.
 
 #### Imagine a cube with these properties:
