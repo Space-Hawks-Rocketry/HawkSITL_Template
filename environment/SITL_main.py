@@ -1,4 +1,11 @@
-from simulation.environment_main import SITL_controlUpdate, SITL_physicsUpdate, SITL_pollSensorData, SITL_finish, SITL_setup
+##################################################################
+##
+##    SITL_main.py -- Core HawkSITL driver. WARNING: Do NOT touch 
+##    unless you know what you're doing!!
+##
+##################################################################
+
+from simulation.environment_main import SITL_controlUpdate, SITL_physicsUpdate, SITL_createSensorData, SITL_finish, SITL_setup
 from framework.core.IPC_computer import IPC_Computer
 from framework.core.SITL_handle import SITLHandle
 
@@ -29,7 +36,7 @@ SITL_setup(sitl_handle) # User-defined setup
 # Begin main simulation loop
 while running:
 
-  sensor_data = SITL_pollSensorData(sitl_handle) # User-defined sensor data
+  sensor_data = SITL_createSensorData(sitl_handle) # User-defined sensor data
   ipc.sendJSON(sensor_data)
   computer_response = ipc.recvJSON() # User-defined computer control response
 
@@ -40,9 +47,14 @@ while running:
 
   remaining_dt = computer_dt
   while remaining_dt > target_dt:
-    SITL_physicsUpdate(sitl_handle, t, target_dt) # User-defined physics update
+    actual_t = t + computer_dt - remaining_dt
+    
+    SITL_physicsUpdate(sitl_handle, actual_t, target_dt) # User-defined physics update
+    sitl_handle._update(actual_t, target_dt) # Update handle
     remaining_dt -= target_dt
-  SITL_physicsUpdate(sitl_handle, t, remaining_dt) # User-defined physics update
+  actual_t = t + computer_dt - remaining_dt
+  SITL_physicsUpdate(sitl_handle, actual_t, remaining_dt) # User-defined physics update
+  sitl_handle._update(actual_t, remaining_dt) # Update handle
 
   t += computer_dt
 

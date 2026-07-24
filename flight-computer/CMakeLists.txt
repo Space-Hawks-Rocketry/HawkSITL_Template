@@ -28,4 +28,7 @@ endforeach()
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
 
 # 4. Add the directories to your target
-target_include_directories(FlightComputer PRIVATE ${INCLUDE_DIRS})
+# target_include_directories(FlightComputer PRIVATE ${INCLUDE_DIRS})
+target_include_directories(FlightComputer PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
