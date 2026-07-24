@@ -28,7 +28,7 @@ void KalmanAltEstimator::updateAltimeter2(float altitude_measurement) {
     covariance = (Matrix2d::Identity() - K * C) * covariance;
 }
 
-/* Predict current state (altitude and vertical velocity). */
+/* Predict current state (altitude and vertical velocity). Must be done before updating. */
 void KalmanAltEstimator::predict(float accel_est, float dt) {
     Matrix2d A;
     A << 1.0, dt,

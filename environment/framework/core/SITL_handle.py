@@ -20,7 +20,7 @@ class SITLHandle:
         self._scheduled_delegates.append((time_ramaining, delegate))
 
     def _update(self, t, dt):
-        '''Update the handle'''
+        '''Update the handle. To be used by SITL_main only.'''
         self.t = t
         self.dt = dt
         ## Count down timer on scheduled delegates
